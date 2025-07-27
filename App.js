@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View,Button,TextInput,ScrollView,FlatList} from 'react-native';
 import {useState} from 'react';
@@ -6,15 +8,27 @@ import GoalInput from './GoalInput';
 export default function App() {
   const[goals,setGoals]=useState([]) 
   const[isModalVisible, setIsModalVisible]=useState(false);
+  useEffect(() => {
+  async function loadGoals() {
+    const storedGoals = await AsyncStorage.getItem('goals');
+    if (storedGoals) {
+      setGoals(JSON.parse(storedGoals));
+    }
+  }
+  loadGoals();
+}, []);
+
   function addGoalHandler(goalText)
   {
-       setGoals((currentGoals)=>[...currentGoals,goalText])
+       const updatedGoals = [...goals, goalText];
+       setGoals(updatedGoals);
+       AsyncStorage.setItem('goals', JSON.stringify(updatedGoals));
   }
   function deleteItem(index)
   {
-   
-    const newGoals=goals.filter((el,i)=>i!=index)
-    setGoals(newGoals);
+   const newGoals = goals.filter((el, i) => i !== index);
+  setGoals(newGoals);
+  AsyncStorage.setItem('goals', JSON.stringify(newGoals));
   }
   function startAddGoalHandler()
   {
